@@ -8,7 +8,7 @@ app = FastAPI(title="Placement Portal API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://placement-portal.vercel.app"],
+    allow_origins=["http://localhost:5173", "https://placement-portal-nine-tau.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
