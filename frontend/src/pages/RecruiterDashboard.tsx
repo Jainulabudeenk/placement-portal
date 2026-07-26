@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { getMyJobs, createJob, type Job } from '../api/jobsApi'
 import { getApplicantsForJob, updateApplicationStatus, type Application } from '../api/applicationsApi'
-import { useAuth } from '../context/AuthContext'
+
 
 const STATUS_OPTIONS = ['applied', 'shortlisted', 'interview', 'selected', 'rejected']
 
 export default function RecruiterDashboard() {
-  const { user } = useAuth()
+
   const [jobs, setJobs] = useState<Job[]>([])
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [applicants, setApplicants] = useState<Application[]>([])
