@@ -16,5 +16,7 @@ def upload_resume(file_bytes: bytes, filename: str) -> str:
         resource_type="raw",
         public_id=f"resumes/{filename}",
         overwrite=True,
+        use_filename=True,
+        unique_filename=False,
     )
     return result["secure_url"]

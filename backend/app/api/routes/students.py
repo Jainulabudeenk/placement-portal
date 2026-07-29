@@ -29,7 +29,8 @@ def upload_resume_endpoint(
         raise HTTPException(status_code=400, detail="Student profile not found")
 
     file_bytes = file.file.read()
-    unique_name = f"{student.id}_{uuid.uuid4().hex[:8]}"
+    file_extension = file.filename.split(".")[-1] if file.filename and "." in file.filename else "pdf"
+    unique_name = f"resume_{uuid.uuid4().hex[:8]}.{file_extension}"
     resume_url = upload_resume(file_bytes, unique_name)
 
     student.resume_url = resume_url
