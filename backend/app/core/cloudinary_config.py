@@ -13,10 +13,10 @@ cloudinary.config(
 def upload_resume(file_bytes: bytes, filename: str) -> str:
     result = cloudinary.uploader.upload(
         file_bytes,
-        resource_type="raw",
-        public_id=f"resumes/{filename}",
+        resource_type="image",
+        type="upload",
+        format="pdf",
+        public_id=f"resumes/{filename.rsplit('.', 1)[0]}",
         overwrite=True,
-        use_filename=True,
-        unique_filename=False,
     )
     return result["secure_url"]
