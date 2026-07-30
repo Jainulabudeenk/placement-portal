@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getMyJobs, createJob, type Job } from '../api/jobsApi'
-import { getApplicantsForJob, updateApplicationStatus, type Application } from '../api/applicationsApi'
+import { getApplicantsForJob, updateApplicationStatus, type Applicant } from '../api/applicationsApi'
 import { downloadCSV } from '../utils/csvExport'
 
 const STATUS_OPTIONS = ['applied', 'shortlisted', 'interview', 'selected', 'rejected']
@@ -17,7 +17,7 @@ export default function RecruiterDashboard() {
   const [jobs, setJobs] = useState<Job[]>([])
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [selectedJobTitle, setSelectedJobTitle] = useState<string>('')
-  const [applicants, setApplicants] = useState<Application[]>([])
+  const [applicants, setApplicants] = useState<Applicant[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showForm, setShowForm] = useState(false)
@@ -84,9 +84,10 @@ export default function RecruiterDashboard() {
     downloadCSV(
       `${selectedJobTitle || 'applicants'}.csv`,
       applicants.map((a) => ({
+        Name: a.student_name,
         'Applied Date': new Date(a.applied_at).toLocaleDateString(),
         Status: a.status,
-        'Resume URL': a.resume_snapshot_url || 'Not uploaded',
+        'Resume URL': a.resume_url || 'Not uploaded',
       }))
     )
   }
@@ -208,20 +209,32 @@ export default function RecruiterDashboard() {
             </div>
             {!selectedJobId && <p className="text-gray-400 text-sm">Select a job to view applicants</p>}
             <div className="space-y-3">
-              {applicants.map((app) => (
+             {applicants.map((app) => (
                 <div key={app.id} className="border border-gray-100 rounded-xl px-4 py-3">
+                  <p className="text-sm font-medium text-gray-900 mb-1">{app.student_name}</p>
                   <p className="text-xs text-gray-500 mb-2">
                     Applied: {new Date(app.applied_at).toLocaleDateString()}
                   </p>
-                  <select
-                    value={app.status}
-                    onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                    className={`border rounded-lg px-3 py-1.5 text-xs font-medium capitalize focus:outline-none ${STATUS_STYLES[app.status] || ''}`}
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <select
+                      value={app.status}
+                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                      className={`border rounded-lg px-3 py-1.5 text-xs font-medium capitalize focus:outline-none ${STATUS_STYLES[app.status] || ''}`}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    {app.resume_url ? (
+                      <a href={app.resume_url} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300 rounded-lg px-3 py-1.5">
+                        View Resume
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400 border border-gray-200 rounded-lg px-3 py-1.5">
+                        No resume
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
               {selectedJobId && applicants.length === 0 && (

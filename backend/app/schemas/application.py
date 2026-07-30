@@ -20,5 +20,18 @@ class ApplicationResponse(BaseModel):
         from_attributes = True
 
 
+class ApplicantResponse(BaseModel):
+    id: uuid.UUID
+    student_id: uuid.UUID
+    job_id: uuid.UUID
+    status: str
+    applied_at: datetime
+    resume_url: Optional[str]
+    student_name: str
+
+    class Config:
+        from_attributes = True
+
+
 class ApplicationStatusUpdate(BaseModel):
-    status: str  # applied, shortlisted, interview, selected, rejected
+    status: str
