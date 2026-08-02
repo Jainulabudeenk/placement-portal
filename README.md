@@ -1,6 +1,6 @@
 # Placement Portal — Campus Recruitment Management System
 
-A full-stack, role-based placement portal that connects **students**, **recruiters**, and **placement officers (admin)** on a single platform — students browse and apply to jobs, recruiters post jobs and shortlist candidates, and admins approve companies and track placement analytics.
+A full-stack, role-based placement portal that connects **students**, **recruiters**, and **placement officers (admin)** on a single platform — students browse jobs, upload resumes, and apply; recruiters post jobs, review applicants and resumes, and shortlist candidates; admins approve companies and track live placement analytics.
 
 **Live Demo:** [placement-portal-nine-tau.vercel.app](https://placement-portal-nine-tau.vercel.app)
 **API Docs (Swagger):** [placement-portal-9vrm.onrender.com/docs](https://placement-portal-9vrm.onrender.com/docs)
@@ -25,6 +25,8 @@ Try each role live:
 
 ### Student
 - Register / login (JWT authentication)
+- Edit profile (department, CGPA)
+- Upload resume (PDF/Word, stored on Cloudinary, viewable inline in-browser)
 - Browse all posted jobs
 - Apply to jobs (one-click, duplicate-apply protection)
 - Track application status in real time (Applied → Shortlisted → Interview → Selected/Rejected)
@@ -32,19 +34,23 @@ Try each role live:
 ### Recruiter
 - Register company (pending admin approval)
 - Post job openings
-- View all applicants for each job
+- View all applicants for each job, including applicant name and live resume link
 - Update applicant status (shortlist, move to interview, select, reject)
+- Export applicant list to CSV
 
 ### Admin
 - View pending company registrations and approve them
 - View live placement analytics (students, companies, jobs, applications, selections)
 - View all registered students
+- Export student list to CSV
 
 ### Platform-wide
 - JWT-based authentication with password hashing (bcrypt)
 - Role-based access control (RBAC) enforced on both frontend routes and backend endpoints
-- Automatic role-based redirects — each user lands on their correct dashboard
+- Automatic role-based redirects and route guards — each user only ever sees their own dashboard
 - Fully relational PostgreSQL schema (users, students, companies, recruiters, jobs, applications)
+- Resume storage via Cloudinary, with live (not stale) resume links shown to recruiters regardless of when a student applied
+- Professional, consistent UI across all pages (Tailwind CSS)
 
 ---
 
@@ -61,9 +67,13 @@ Try each role live:
 - SQLAlchemy ORM
 - Alembic (database migrations)
 - JWT (python-jose) + bcrypt (passlib) for authentication
+- Cloudinary SDK for file storage
 
 **Database**
 - PostgreSQL (hosted on [Neon](https://neon.tech))
+
+**File Storage**
+- [Cloudinary](https://cloudinary.com) (resume uploads)
 
 **Deployment**
 - Frontend: [Vercel](https://vercel.com)
@@ -84,6 +94,7 @@ Student / Recruiter / Admin (browser)
      FastAPI Backend (Render)
       ├── JWT auth & RBAC middleware
       ├── SQLAlchemy ORM
+      ├── Cloudinary integration (resume storage)
               │
               ▼
      PostgreSQL Database (Neon)
@@ -96,7 +107,7 @@ All requests from the frontend go through a single FastAPI backend, which enforc
 ## Database Schema
 
 - **users** — shared auth table (email, password hash, role)
-- **students** — student profile, linked to `users`
+- **students** — student profile (full name, department, CGPA, resume URL), linked to `users`
 - **companies** — recruiter's company, gated by `is_approved`
 - **recruiters** — recruiter profile, linked to `users` and `companies`
 - **jobs** — job postings, linked to `companies` and `recruiters`
@@ -118,6 +129,9 @@ pip install -r requirements.txt
 # SECRET_KEY=your_random_secret
 # ALGORITHM=HS256
 # ACCESS_TOKEN_EXPIRE_MINUTES=60
+# CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+# CLOUDINARY_API_KEY=your_cloudinary_api_key
+# CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
 alembic upgrade head
 uvicorn app.main:app --reload
@@ -136,7 +150,7 @@ Frontend runs at `http://localhost:5173`.
 
 ## Roadmap
 
-See [ROADMAP.md](./ROADMAP.md) for planned features, including resume upload, email notifications, search/filter, and analytics charts.
+See [ROADMAP.md](./ROADMAP.md) for planned features, including email notifications, search/filter, and password reset.
 
 ---
 
