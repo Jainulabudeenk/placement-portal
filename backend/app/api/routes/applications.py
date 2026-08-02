@@ -9,6 +9,7 @@ from app.models.student import Student
 from app.models.job import Job
 from app.models.application import Application
 from app.schemas.application import ApplicationCreate, ApplicationResponse, ApplicantResponse, ApplicationStatusUpdate
+
 router = APIRouter(prefix="/applications", tags=["applications"])
 
 
@@ -56,15 +57,6 @@ def my_applications(
     return db.query(Application).filter(Application.student_id == student.id).all()
 
 
-@router.get("/job/{job_id}", response_model=List[ApplicationResponse])
-def applicants_for_job(
-    job_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_role("recruiter")),
-):
-    return db.query(Application).filter(Application.job_id == job_id).all()
-
-
 @router.get("/job/{job_id}", response_model=List[ApplicantResponse])
 def applicants_for_job(
     job_id: str,
@@ -87,3 +79,24 @@ def applicants_for_job(
             )
         )
     return results
+
+
+@router.patch("/{application_id}/status", response_model=ApplicationResponse)
+def update_application_status(
+    application_id: str,
+    payload: ApplicationStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("recruiter")),
+):
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    valid_statuses = {"applied", "shortlisted", "interview", "selected", "rejected"}
+    if payload.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail=f"Status must be one of: {', '.join(valid_statuses)}")
+
+    application.status = payload.status
+    db.commit()
+    db.refresh(application)
+    return application
